@@ -12,8 +12,8 @@ docker build . --tag  crawler-gogo:latest && \
 docker run -v "$(pwd)/$CUR_DATE:/usr/src/app/$CUR_DATE" crawler-gogo:latest
 ```
 
-> ![NOTE]
+> [!NOTE]
 > Use `$(pwd)` to correctly obtain the current directory path.
 
-> ![NOTE]
+> [!NOTE]
 > You can modify the `/usr/src/app/` directory in the container based on your project's structure.
