@@ -2,6 +2,9 @@ package main
 
 import (
 	"bufio"
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -41,6 +44,21 @@ func loadFile() []string {
 	return lines
 }
 
+func writeFile(filename string, content string) {
+	file, err := os.Create(filename)
+	check(err)
+	defer file.Close()
+	writer := bufio.NewWriter(file)
+	_, err = writer.WriteString(content)
+	check(err)
+	writer.Flush()
+}
+
+func generateHashFrom(key string) string {
+	hash := sha256.Sum256([]byte(key))
+	return hex.EncodeToString(hash[:])
+}
+
 func fetch(wg *sync.WaitGroup, ch chan<- FetchOutput, input FetchInput) {
 	defer wg.Done()
 	time.Sleep(1 * time.Second)
@@ -68,4 +86,11 @@ func main() {
 		wg.Wait()
 		close(ch)
 	}()
+	dirName := time.Now().Format("20060102")
+	os.MkdirAll(dirName, os.ModePerm)
+	filenamePrefix := fmt.Sprintf("./%s/", dirName)
+	for output := range ch {
+		outputFilename := filenamePrefix + generateHashFrom(output.input.url) + ".html"
+		writeFile(outputFilename, output.content)
+	}
 }
