@@ -81,7 +81,7 @@ func fetch(wg *sync.WaitGroup, ch chan<- FetchOutput, input FetchInput) {
 	fmt.Printf("Fetched url: %s\n", input.url)
 }
 
-func collectContents(urls []string) []FetchOutput {
+func fetchUrls(urls []string) []FetchOutput {
 	ch := make(chan FetchOutput)
 	var wg sync.WaitGroup
 
@@ -125,7 +125,7 @@ func saveContents(outputs []FetchOutput) []string {
 
 func main() {
 	urls := loadFile()
-	outputs := collectContents(urls)
+	outputs := fetchUrls(urls)
 	filenames := saveContents(outputs)
 	fmt.Println(filenames)
 }
