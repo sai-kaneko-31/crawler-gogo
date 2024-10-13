@@ -81,8 +81,7 @@ func fetch(wg *sync.WaitGroup, ch chan<- FetchOutput, input FetchInput) {
 	fmt.Printf("Fetched url: %s\n", input.url)
 }
 
-func main() {
-	urls := loadFile()
+func collectContents(urls []string) []string {
 	ch := make(chan FetchOutput)
 	var wg sync.WaitGroup
 
@@ -107,8 +106,17 @@ func main() {
 	dirName := time.Now().Format("20060102")
 	os.MkdirAll(dirName, os.ModePerm)
 	filenamePrefix := fmt.Sprintf("./%s/", dirName)
+	var filenames []string
 	for output := range ch {
 		outputFilename := filenamePrefix + generateHashFrom(output.input.url) + ".html"
 		writeFile(outputFilename, output.content)
+		filenames = append(filenames, outputFilename)
 	}
+	return filenames
+}
+
+func main() {
+	urls := loadFile()
+	filenames := collectContents(urls)
+	fmt.Println(filenames)
 }
