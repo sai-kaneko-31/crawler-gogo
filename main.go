@@ -96,8 +96,7 @@ func collectContents(urls []string) []string {
 		alreadyFetchedDomains[domain] = true
 
 		wg.Add(1)
-		input := FetchInput{url}
-		go fetch(&wg, ch, input)
+		go fetch(&wg, ch, FetchInput{url})
 	}
 	go func() {
 		wg.Wait()
