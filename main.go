@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"sync"
 	"time"
@@ -54,6 +55,12 @@ func writeFile(filename string, content string) {
 	writer.Flush()
 }
 
+func getDomain(inputURL string) string {
+	parsedURL, err := url.Parse(inputURL)
+	check(err)
+	return parsedURL.Host
+}
+
 func generateHashFrom(key string) string {
 	hash := sha256.Sum256([]byte(key))
 	return hex.EncodeToString(hash[:])
@@ -71,13 +78,24 @@ func fetch(wg *sync.WaitGroup, ch chan<- FetchOutput, input FetchInput) {
 	byteArray, err := io.ReadAll(res.Body)
 	check(err)
 	ch <- FetchOutput{input, string(byteArray)}
+	fmt.Printf("Fetched url: %s\n", input.url)
 }
 
 func main() {
 	urls := loadFile()
 	ch := make(chan FetchOutput)
 	var wg sync.WaitGroup
+
+	alreadyFetchedDomains := make(map[string]bool)
+
 	for _, url := range urls {
+		domain := getDomain(url)
+		if alreadyFetchedDomains[domain] {
+			fmt.Printf("Skipped url: %s\n", url)
+			continue
+		}
+		alreadyFetchedDomains[domain] = true
+
 		wg.Add(1)
 		input := FetchInput{url}
 		go fetch(&wg, ch, input)
