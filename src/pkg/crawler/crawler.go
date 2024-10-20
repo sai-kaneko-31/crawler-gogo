@@ -58,6 +58,7 @@ func Start(input Input) Output {
 
 	output := Output{
 		Input:      input,
+		FetchedAt:  time.Now(),
 		StatusCode: res.StatusCode,
 		Content:    resBody,
 	}
